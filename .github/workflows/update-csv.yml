@@ -1,0 +1,26 @@
+name: Update MLB DFS CSV
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'     # Every 5 minutes
+  workflow_dispatch:          # Allows manual trigger
+
+jobs:
+  update-csv:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download latest CSV from Google Sheet
+        run: |
+          curl -L -o mlb-dfs-cheat-sheet.csv "https://docs.google.com/spreadsheets/d/e/2PACX-1vR5Ja81R4qOvLCMJ9qUK5z-kj8vedU1v_jAvp9QO08JVE2ZTHdgOPLZWtydycvpnKsbsaTtPS_tY7ez/pub?gid=242480999&single=true&output=csv"
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add mlb-dfs-cheat-sheet.csv
+          git commit -m "Auto-update CSV - $(date)" || echo "No changes to commit"
+          git push
